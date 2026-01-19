@@ -713,7 +713,7 @@ const inicializarDataTable = () => {
                     }
                     return [];
                 },
-                error: function (xhr, error, thrown) {
+                error: function (xhr, error) {
                     console.error("Error al cargar datos:", error);
                     Swal.fire({
                         icon: "error",
@@ -1072,7 +1072,7 @@ const toggleEstado = async (id, esActivar) => {
     if (result.isConfirmed) {
         try {
             const response = await axios.patch(
-                `/api/v1/proveedores/${id}/toggle-estado`
+                `/api/v1/proveedores/${id}/toggle-estado`,
             );
 
             if (response.data.success) {
