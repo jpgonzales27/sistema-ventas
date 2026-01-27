@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   # ==================================================================
-  # JOB 1: BACKEND QUALITY GATES (PHP/Laravel)
+  # JOB 1: BACKEND QUALITY GATES (PHP/Laravel + Vite Build)
   # ==================================================================
   backend-quality:
     name: Backend Quality (PHP)
@@ -23,14 +23,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2
+      # --- Configuración de PHP ---
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_pgsql
           coverage: xdebug
 
-      # Cache de dependencias Composer
       - name: Cache Composer Dependencies
         uses: actions/cache@v4
         with:
@@ -42,6 +42,20 @@ jobs:
       - name: Install Composer Dependencies
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+      # --- Configuración de Node (Necesario para que Vite no falle en los tests) ---
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Build Frontend Assets (Vite)
+        run: npm run build
+
+      # --- Validaciones y Tests ---
       - name: "Gate 1: Code Style (Laravel Pint)"
         run: ./vendor/bin/pint --test
 
@@ -54,7 +68,6 @@ jobs:
       - name: "Gate 2: Security Audit (Composer)"
         run: composer audit
 
-      # PHPUnit con coverage mínimo del 80%
       - name: "Gate 3: PHPUnit Tests with Coverage"
         run: |
           php artisan test --coverage-text --coverage-clover=coverage.xml
@@ -62,7 +75,7 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
 
-      # Upload coverage report
+      # --- Reportes ---
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         if: always()
