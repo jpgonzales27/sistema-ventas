@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Deploy to staging
 
 on:
   # Trigger after successful build on main
@@ -15,23 +15,23 @@ on:
         required: true
 
 concurrency:
-  group: deploy-production
+  group: deploy-staging
   cancel-in-progress: false
 
 env:
-  ENVIRONMENT: production
+  ENVIRONMENT: staging
   HEALTH_CHECK_TIMEOUT: 60
 
 jobs:
   deploy:
-    name: Deploy to Production
+    name: Deploy to c
     runs-on: self-hosted
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'ci-dia4'))
 
     # REQUIRES MANUAL APPROVAL
-    environment: production
+    environment: staging
 
     steps:
       - name: Checkout Repository
@@ -46,7 +46,7 @@ jobs:
             # Get latest release from main (non-prerelease)
             RELEASE_TAG=$(gh release list --limit 10 | grep -v 'Pre-release' | grep -v 'develop' | head -1 | awk '{print $1}' || echo "")
             if [ -z "$RELEASE_TAG" ]; then
-              echo "No production release found"
+              echo "No staging release found"
               exit 1
             fi
           fi
@@ -57,15 +57,15 @@ jobs:
 
       - name: Display Deployment Info
         run: |
-          echo "## 🚀 Production Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Staging Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "> [!CAUTION]" >> $GITHUB_STEP_SUMMARY
-          echo "> This is a PRODUCTION deployment (Self-Hosted)" >> $GITHUB_STEP_SUMMARY
+          echo "> This is a STAGING deployment (Self-Hosted)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Release** | \`${{ steps.release.outputs.release_tag }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Environment** | production |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | staging |" >> $GITHUB_STEP_SUMMARY
           echo "| **Approved by** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Timestamp** | $(date -Iseconds) |" >> $GITHUB_STEP_SUMMARY
 
@@ -129,7 +129,7 @@ jobs:
           echo "📝 Creating .env file from secrets..."
           ENV_FILE="${{ secrets.STAGING_PATH }}/shared/.env"
           echo 'APP_NAME="Sistema Ventas"' > "$ENV_FILE"
-          echo 'APP_ENV=production' >> "$ENV_FILE"
+          echo 'APP_ENV=stating' >> "$ENV_FILE"
           echo 'APP_KEY=${{ secrets.APP_KEY }}' >> "$ENV_FILE"
           echo 'APP_DEBUG=false' >> "$ENV_FILE"
           echo 'APP_URL=${{ secrets.PROD_URL }}' >> "$ENV_FILE"
