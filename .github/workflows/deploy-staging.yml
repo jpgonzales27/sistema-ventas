@@ -129,6 +129,7 @@ jobs:
           echo "📝 Creating .env file from secrets..."
           ENV_FILE="${{ secrets.STAGING_PATH }}/shared/.env"
           echo 'APP_NAME="Sistema Ventas"' > "$ENV_FILE"
+          echo "APP_VERSION=${{ steps.release.outputs.release_tag }}" >> "$ENV_FILE"
           echo 'APP_ENV=stating' >> "$ENV_FILE"
           echo 'APP_KEY=${{ secrets.APP_KEY }}' >> "$ENV_FILE"
           echo 'APP_DEBUG=false' >> "$ENV_FILE"
@@ -346,3 +347,15 @@ jobs:
             echo "❌ No previous release for rollback"
             cd current 2>/dev/null && php artisan up || true
           fi
+
+      - name: Deployment Summary (Trazabilidad)
+        if: always()
+        run: |
+          echo "### 📊 Trazabilidad del Despliegue - ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Propiedad | Detalle |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Versión (Tag)** | \`${{ steps.release.outputs.release_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Estado Final** | ${{ job.status == 'success' && '✅ Éxito' || '❌ Falló' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Ambiente** | ${{ env.ENVIRONMENT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Ejecutado por** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **SHA Commit** | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
