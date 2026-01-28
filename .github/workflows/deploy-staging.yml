@@ -24,7 +24,7 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to c
+    name: Deploy to stating
     runs-on: self-hosted
     if: |
       github.event_name == 'workflow_dispatch' ||
