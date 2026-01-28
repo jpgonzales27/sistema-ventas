@@ -8,12 +8,19 @@ use App\Services\AuditLogger;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class CategoriaController extends Controller
 {
     public function index(Request $request)
     {
+        Log::shareContext([
+            'ip' => $request->ip(),
+        ]);
+
+        // Al hacer el Log, el user_id aparecerá automáticamente en el %extra% o %context%
+        Log::info('Procesando nueva operación de venta');
         try {
             $query = Categoria::query();
 
